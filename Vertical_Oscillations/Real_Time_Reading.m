@@ -1,18 +1,27 @@
-% Script used to read and plot the values received from analog input A0
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Author : Olivier Leblanc
+% Date : 17/05/2020
+%
+% Function :
+% Reads and plots the values received from analog input A0
 % from the Arduino Uno in real-time. "AnalogReadSerial" code in the
 % examples of Arduino IDE must run and the serial monitor must be closed.
+%
+% Inputs :
+maxVal = 400;           % number of values in plot 
+n_mult = 1;             % number of times we plot maxVal measurements
+baudrate = 250000;      % baudrate imposed by the Arduino Uno code
+%
+% Outputs :
+% /.
+%
+% Options :
+newreading = 1;         % If 0 : only show the FFT of already saved data
+True_meas = 0;          % If 0, use artificial data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 close all;
 clc;
-
-%% Options
-
-maxVal = 400;  % Number of values plotted.
-n_mult = 1; % Number of times we plot maxVal measurements
-baudrate = 250000; % 115200
-
-newreading = 1;
-True_meas = 0; % If 0, use artificial data
 
 %% Reading of new values
 
@@ -110,7 +119,7 @@ if (newreading)
             set(lhy, 'ydata', Acc_Y);
             set(lhz, 'ydata', Acc_Z);
             
-            % Obtention enveloppe du signal pour calculer l'amplitude moyenne des oscillations
+            % Obtention signal envelope to compute the mean amplitude of the oscillations
             ind = count-20:count;
             ind(ind<1) = ind(ind<1)+maxVal; % Wrap ind values inside [1, maxVal]
             %                 [up(ind), ~] = envelope(Acc_Z(ind), 5, 'peak'); % maybe add 'peak'.. 10 is the number of samples between maxima
@@ -153,25 +162,25 @@ if (newreading)
     end
 end
 
-% %% Spectrum analysis
-% Acc_X_fourier = abs(fftshift(fft(Acc_X)));
-% Acc_Y_fourier = abs(fftshift(fft(Acc_Y)));
-% Acc_Z_fourier = abs(fftshift(fft(Acc_Z)));
-%
-% % Cut DC value
-% Acc_X_fourier(round(maxVal/2)+1)=0;
-% Acc_Y_fourier(round(maxVal/2)+1)=0;
-% Acc_Z_fourier(round(maxVal/2)+1)=0;
-%
-% x = (-round(maxVal/2)+1:round(maxVal/2)-1).*fs./(maxVal);
-%
-% fig2 = figure(2); hold on;
-% set(fig2, 'position',[800 200 500 500]);
-% xlim([0 fs/2]);
-% xlabel('f [Hz]');
-% ylabel('Acceleration spectrum [mg]')
-% plot(x,Acc_X_fourier(1:maxVal-1), 'm', 'LineWidth', 2.0);
-% plot(x,Acc_Y_fourier(1:maxVal-1), 'g', 'LineWidth', 2.0);
-% plot(x,Acc_Z_fourier(1:maxVal-1), 'r', 'LineWidth', 2.0)
-% legend('FFT of Acc_X','FFT of Acc_Y', 'FFT of Acc_Z');
+%% Spectrum analysis
+Acc_X_fourier = abs(fftshift(fft(Acc_X)));
+Acc_Y_fourier = abs(fftshift(fft(Acc_Y)));
+Acc_Z_fourier = abs(fftshift(fft(Acc_Z)));
+
+% Cut DC value
+Acc_X_fourier(round(maxVal/2)+1)=0;
+Acc_Y_fourier(round(maxVal/2)+1)=0;
+Acc_Z_fourier(round(maxVal/2)+1)=0;
+
+x = (-round(maxVal/2)+1:round(maxVal/2)-1).*fs./(maxVal);
+
+fig2 = figure(2); hold on;
+set(fig2, 'position',[800 200 500 500]);
+xlim([0 fs/2]);
+xlabel('f [Hz]');
+ylabel('Acceleration spectrum [mg]')
+plot(x,Acc_X_fourier(1:maxVal-1), 'm', 'LineWidth', 2.0);
+plot(x,Acc_Y_fourier(1:maxVal-1), 'g', 'LineWidth', 2.0);
+plot(x,Acc_Z_fourier(1:maxVal-1), 'r', 'LineWidth', 2.0)
+legend('FFT of Acc_X','FFT of Acc_Y', 'FFT of Acc_Z');
 
