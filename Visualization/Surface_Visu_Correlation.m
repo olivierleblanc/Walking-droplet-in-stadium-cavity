@@ -1,7 +1,27 @@
-%% Script description
-% Correlation based surface visualization
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author : Olivier Leblanc
-% Date : 09-04-2019
+% Date : 16/05/2020
+%
+% Function :
+% This script aims to analyze images or a video of the vibrating bath to
+% estimate the free surface profile of the liquid, in this case silicon oil.
+%
+% Inputs :
+% - image or video directory
+% - ref_num :  Number of the reference image
+% - cur_num :  Number of the current image
+% - ref_length : length of a reference object to compute the resolution
+%
+% Outputs :
+% /.
+%
+% Options :
+analyze_video = 1; % 0 for analyzing a directory of images
+define_resolution = 0;
+define_ROI = 1;
+lighting_effects = 0;  % Enhance surface visualization with ligthning effect
+true_height = 0;    % 1 : gives true reconstructed height. 0 : gives height difference from equilibrium
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 close all;
 clc;
@@ -43,42 +63,63 @@ clc;
 % ref_length = 0.02;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Options
-
-define_resolution = 1;
-define_ROI = 1;
-lighting_effects = 0;  % Enhance surface visualization with ligthning effect
-true_height = 0;    % 1 : gives true reconstructed height. 0 : gives height difference from equilibrium
-
 %% Parameters
 window_size = 16;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Images\';
-directory = '14-04-20_drop';
-filename = 'drop';
-image_format = '.jpeg';
-ref_num = 0;   % Number of the reference image
-cur_num = 534;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Video_Recordings\';
+directory = '';   % Directory name
+filename = '10-04-20_faraday';
+format = '.MOV';
+ref_num = 10;   % Number of the reference image
+% cur_num = 290;
+cur_num = 1500;
 ref_length = 0.02;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% %%%%%%%%%%%%%%%%%%%%%%%%% Video settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Video_Recordings\';
+% directory = '';   % Directory name
+% filename = '16-05-20';
+% format = '.MTS';
+% ref_num = 75;   % Number of the reference image
+% cur_num = 500;
+% ref_length = 0.09;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Physical system values
-lambda = 4.75e-3;   % Typical wavelength
+lambda = 4.72e-3;   % Typical wavelength
 h0 = 6e-3; % Water level
 n = 1.4; % Silicon oil refractive index
 alpha = 1-1/n;  % See paper
-hp = 6e-3;  % Liquid depth
-H = 0.2;  % Distance pattern-camera
-h_star = 2/(1/(alpha*hp)-1/H);
+hp = 6.5e-3;  % Liquid depth
+H = 0.62;  % Distance pattern-camera
+h_star = 1/(1/(alpha*hp)-1/H);
+
+if (analyze_video)
+    obj = VideoReader([folder, directory, filename, format]);
+    % % Automatically find the number of image files in the folder.
+    % /!\ When the video is a MTS file, it gives 50 FPS instead of the true 25 FPS.
+    number_of_images = floor(obj.Duration*obj.FrameRate/2);
+else
+    % number_of_images = numel(dir([folder_name, directory,'\*', image_format]))-1;    % Numbers of images in the folder or to treat
+end
 
 % Load reference image
-Iref = imread([folder, directory,'\',filename,'_',sprintf('%06d',ref_num),'.jpeg']);
+if (analyze_video)
+    Iref = read(obj, ref_num);
+else
+    Iref = imread([folder, directory,'\',filename,'_',sprintf('%06d',ref_num), format]);
+end
 Iref_gray = rgb2gray(Iref);
 % Finds the orientation and resolution of the images.
 [Im_res_y, Im_res_x, ~] = size(Iref_gray);
 % Load current image
-I2 = imread([folder, directory,'\',filename,'_',sprintf('%06d',cur_num(1)),'.jpeg']);
+if (analyze_video)
+    I2 = read(obj, cur_num(1));
+else
+    I2 = imread([folder, directory,'\',filename,'_',sprintf('%06d',cur_num(1)), format]);
+end
 I2_gray = rgb2gray(I2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,6 +144,7 @@ if (define_ROI)
     y_ul = rect(2);
     wx = rect(3);
     hy = rect(4);
+    N = wx*hy;
     
     ROI_indx = x_ul:x_ul+wx;
     ROI_indy = y_ul:y_ul+hy;
@@ -113,13 +155,44 @@ end
 Iref_ROI = Iref(ROI_indy, ROI_indx);
 I2_ROI = I2(ROI_indy, ROI_indx);
 
-% Meshgrid creation
-[X,Y] = meshgrid(1:hy,1:wx);
-
 dx = zeros(wx, hy);
 dy = zeros(wx, hy);
 
 %% Plot
+
+% Load current image
+if (analyze_video)
+    I2 = read(obj, cur_num);
+else
+    I2 = imread([folder, directory,'\',filename,'_',sprintf('%06d',cur_num),'.jpeg']);
+end
+I2_gray = rgb2gray(I2);
+
+% First correct for an eventual shift between reference and current image
+Iref_gray2 = double(Iref_gray);
+m_ref = mean(mean(Iref_gray2));
+Iref_window = Iref_gray2-m_ref;
+fourier_Iref_corr = fftshift(fft2(Iref_window));
+I2_gray2 = double(I2_gray);
+m_2 = mean(mean(I2_gray2));
+I2_window = I2_gray2-m_2;
+fourier_I2_corr = fftshift(fft2(I2_window));
+fourier_prod = fourier_Iref_corr.*conj(fourier_I2_corr);
+corr = fftshift(real(ifft2(ifftshift(fourier_prod))));
+[val y] = max(corr);
+[val2 x] = max(val);
+y = y(x);
+% [X,Y] = meshgrid(1:Im_res_x, 1:Im_res_y);
+% figure(10); hold on;
+% si = surf(X,Y, corr); colorbar;
+% si.EdgeColor = 'none';
+ROI_indy2 = ROI_indy-(y-Im_res_y/2)+1;
+ROI_indx2 = ROI_indx-(x-Im_res_x/2)+1;
+I2_ROI = I2(ROI_indy2, ROI_indx2);
+x-Im_res_x/2
+y-Im_res_y/2
+Iref_gray = double(Iref_gray);
+I2_gray = double(I2_gray);
 
 f1 = figure(1); hold on;
 set(f1, 'position',[0 200 500 500]);
@@ -136,47 +209,13 @@ imshow(I2_ROI);
 axis on;
 drawnow;
 
-% f3 = figure(3); hold on;
-% set(f3, 'position',[400 100 500 500]);
-% s2 = surf(X, Y, dx);
-% s2.EdgeColor = 'none';
-% colorbar;
-% title('dx');
-%
-% f4 = figure(4); hold on;
-% set(f4, 'position',[800 100 500 500]);
-% s3 = surf(X, Y, dy);
-% s3.EdgeColor = 'none';
-% colorbar;
-% title('dy');
-
-% Load current image
-I2 = imread([folder, directory,'\',filename,'_',sprintf('%06d',cur_num(ind)),'.jpeg']);
-I2_gray = rgb2gray(I2);
-
-% % First correct for an eventual shift between reference and current image
-% Iref_gray2 = double(Iref_gray);
-% m_ref = mean(mean(Iref_gray2));
-% Iref_window = Iref_gray2-m_ref;
-% fourier_Iref_corr = fftshift(fft2(Iref_window));
-% I2_gray2 = double(I2_gray);
-% m_2 = mean(mean(I2_gray2));
-% I2_window = I2_gray2-m_2;
-% fourier_I2_corr = fftshift(fft2(I2_window));
-% fourier_prod = fourier_Iref_corr.*conj(fourier_I2_corr);
-% corr = fftshift(real(ifft2(ifftshift(fourier_prod))));
-% [val y] = max(corr);
-% [val2 x] = max(val);
-% y = y(x);
-% [X,Y] = meshgrid(1:Im_res_x, 1:Im_res_y);
-% figure(10); hold on;
-% si = surf(X,Y, corr); colorbar;
-% si.EdgeColor = 'none';
-% dx = x-Im_res_x/2;
-% dy = y-Im_res_y/2;
-
-Iref_gray = double(Iref_gray);
-I2_gray = double(I2_gray);
+f20 = figure(20); hold on;
+set(f20, 'position',[400 200 500 500]);
+axis on;
+title('Modified image');
+imshow(I2_ROI-Iref_ROI);
+axis on;
+drawnow;
 
 % f11 = figure(11); hold on; colorbar;
 % [X,Y] = meshgrid(1:window_size,1:window_size);
@@ -194,12 +233,14 @@ for i = 1:wx  %wx
         Iref_window = Iref_gray(ROI_indy(j)-window_size/2:ROI_indy(j)+window_size/2-1 ,...
             ROI_indx(i)-window_size/2:ROI_indx(i)+window_size/2-1);
         m_ref = mean(mean(Iref_window));
+        std_ref = sqrt( sum(sum( (Iref_window-m_ref).^2 ))./(N) );
         Iref_window = Iref_window-m_ref;
         fourier_Iref_corr = fftshift(fft2(Iref_window));
         
-        I2_window = I2_gray(ROI_indy(j)-window_size/2:ROI_indy(j)+window_size/2-1 ,...
-            ROI_indx(i)-window_size/2:ROI_indx(i)+window_size/2-1);
+        I2_window = I2_gray(ROI_indy2(j)-window_size/2:ROI_indy2(j)+window_size/2-1 ,...
+            ROI_indx2(i)-window_size/2:ROI_indx2(i)+window_size/2-1);
         m_2 = mean(mean(I2_window));
+        std_2 = sqrt( sum(sum( (I2_window-m_2).^2 ))./(N) );
         I2_window = I2_window-m_2;
         fourier_I2_corr = fftshift(fft2(I2_window));
         % Pas oublier que la corrélation c'est pas exactement une
@@ -245,13 +286,30 @@ ff = fftshift(fft2(h));
 ff(abs(ff)<0.005) = 0;
 h = real(ifft2(ifftshift(ff)));
 
-% Plots
-f5 = figure(5); hold on;
-set(f5, 'position',[800 100 500 500]);
-s4 = surf(X,Y, abs(ff));
-s4.EdgeColor = 'none';
+%% Plots
+% Meshgrid creation
+[X,Y] = meshgrid(1:hy,1:wx);
+
+f3 = figure(3); hold on;
+set(f3, 'position',[400 100 500 500]);
+s2 = surf(X, Y, dx);
+s2.EdgeColor = 'none';
 colorbar;
-title('FFT2');
+title('dx');
+
+f4 = figure(4); hold on;
+set(f4, 'position',[800 100 500 500]);
+s3 = surf(X, Y, dy);
+s3.EdgeColor = 'none';
+colorbar;
+title('dy');
+
+% f5 = figure(5); hold on;
+% set(f5, 'position',[800 100 500 500]);
+% s4 = surf(X,Y, abs(ff));
+% s4.EdgeColor = 'none';
+% colorbar;
+% title('FFT2');
 
 f7 = figure(10); hold on;
 set(f7, 'position',[800 200 500 500]);

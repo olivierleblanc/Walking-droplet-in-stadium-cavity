@@ -1,5 +1,22 @@
 function makebospattern(n,diam,figtype,filename)
-%MAKEBOSPATTERN  Random dot pattern for BOS applications
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Note: Strongly inspired from
+%       F. Moisy
+%       Revision: 1.20,  Date: 2008/09/05.
+%       History:
+%       2006/06/26: v1.00, first version ('makepidpattern')
+%       2006/07/03: v1.10, S in mm; black/white option; saves in a TIFF file.
+%       2006/07/05: v1.11, no need to set the PaperPosition and Background mode.
+%       2007/05/29: v1.12, minor additional statistics
+%       2008/09/05: v1.20, now entitled 'makebospattern'
+%
+%
+% Author : Olivier Leblanc
+% Date : 17/05/2020
+% Contribution : the extension from grayscale to multiple colors.
+%
+% Function :
+%   Random dot pattern for BOS applications
 %   MAKEBOSPATTERN(N,D) makes a figure filled with N randomly distributed
 %   dots of diameter D for "Background-oriented Schlieren" (BOS) applications.
 %   The figure format is portrait (ie, vertical) A4, 210x297 mm, and the
@@ -25,22 +42,23 @@ function makebospattern(n,diam,figtype,filename)
 %   Example:
 %      makebospattern(50000,1,'w','myfig');
 %
-%   F. Moisy
-%   Revision: 1.20,  Date: 2008/09/05.
+% Inputs :
+% n : number of dots
+% diam : dot diameter in [mm]
+% figtype : 'b' : black points on a white ground
+%           'w' : white points on a black ground
+%           'm' : rgb points on a white ground
+% filename : to save the generated dot pattern
 %
-%   See also PRINT.
-
+% outputs :
+% /
+%
+% Options :
+% /
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 close all;
 clc;
-
-% History:
-% 2006/06/26: v1.00, first version ('makepidpattern')
-% 2006/07/03: v1.10, S in mm; black/white option; saves in a TIFF file.
-% 2006/07/05: v1.11, no need to set the PaperPosition and Background mode.
-% 2007/05/29: v1.12, minor additional statistics
-% 2008/09/05: v1.20, now entitled 'makebospattern'
-
 
 % default values:
 if ~exist('n','var'), n=50000; end

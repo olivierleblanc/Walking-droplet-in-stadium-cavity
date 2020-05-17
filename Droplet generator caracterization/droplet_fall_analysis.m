@@ -16,9 +16,9 @@ clc;
 find_pixel2mm = 0;
 estim_diam = 0;
 show_images = 0;
-show_found_droplets = 1; %1-estim_diam
+show_found_droplets = 0; %1-estim_diam
 
-give_boxplot = 0;
+give_boxplot = 1;
 
 %% Parameters
 
@@ -30,7 +30,7 @@ folder_name = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Droplet_Gener
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directory name
-directory = 'nozzle1_pulse5500_voltage35';
+directory = 'nozzle3_pulse5000_voltage50';
 im_name = 'drop';
 image_format = '.jpeg';
 numdrop = 20; % Number of created droplets
@@ -97,7 +97,7 @@ if (estim_diam)
     i = 1;
     for ind=first_image:subsample:number_of_images
         % for ind=2:subsample:150
-%             for ind=937:subsample:937
+%             for ind=324:subsample:324
         
         I2 = imread([folder_name, directory, '\', im_name, '_', sprintf('%06d',ind), image_format]);
         I2 = I2(ROI_indx, ROI_indy, :);
@@ -118,7 +118,7 @@ if (estim_diam)
         I5 = I5./255;
         
         % We found a droplet!
-        if (sum(sum(I5))>1200)
+        if (sum(sum(I5))>1000)
             image_with_drop(i) = ind;
             % Compute widths
             horiz_sum = sum(I5')';
@@ -230,6 +230,11 @@ if (give_boxplot)
     arr(1)=[];
     x(1) = [];
     boxplot(arr, x); hold on;
+    xlabel('Test index');
+    ylabel('Droplet diameter [mm]');
+    ax = gca;
+ax.FontSize = 12;
+ax.FontWeight = 'bold';
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
