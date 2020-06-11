@@ -84,7 +84,7 @@ clc;
 
 lighting_effects = 0;  % Enhance surface visualization with ligthning effect
 true_height = 0;    % 1 : gives true reconstructed height. 0 : gives height difference from equilibrium
-color_processing = 1;   % Compute distance between the positions of the point with RGB
+color_processing = 0;   % Compute distance between the positions of the point with RGB
 testweight = 0;
 use_correl = 0; % increases the computational time a lot
 fourier_filtering = 1;  % Spatial filtering in Fourier domain.
@@ -92,10 +92,11 @@ hard_fourier_thresholding = 1;  % Needs 'fourier_filtering' activated.
 
 %% Parameters
 
-dir = '13-11-19_AirGap';   % Directory name
-filename = 'airgap';
+% Files parameters
+dir = '13-11-19_Droplet';   % Directory name
+filename = 'droplet';
 ref_num = 0;   % Number of the reference image
-cur_num = 316;
+cur_num = 800;
 Resolution = 185e-6;  % Real size of a pixel
 
 % Processing parameters
@@ -103,7 +104,7 @@ num_tests = 5;
 neighbour_size = 10;     % For correlation
 x_size = 300;            % For ROI
 y_size = 300;
-ROI_center = [695, 790];
+ROI_center = [480, 540];
 percentile_to_cut = 0.99;   % Percentile under which the fourier values are put to 0
 
 % Physical system values
@@ -476,12 +477,26 @@ else
     f1 = figure(1); hold on;
     imshow(Iref_ROI);
     axis on;
-    title('Reference image');
+%     title('Reference image');
+    ax = gca;
+    xTick = get(ax,'XTick');
+    set(ax,'XTick',downsample(xTick,2));
+    yTick = get(ax,'YTick');
+    set(ax,'YTick',downsample(yTick,2));
+    ax.XTickLabel = ax.XTick.*Resolution;
+    ax.YTickLabel = ax.YTick.*Resolution;
     
     f2 = figure(2); hold on;
     imshow(I2_ROI);
     axis on;
-    title('Modified image');
+%     title('Modified image');
+    ax = gca;
+    xTick = get(ax,'XTick');
+    set(ax,'XTick',downsample(xTick,2));
+    yTick = get(ax,'YTick');
+    set(ax,'YTick',downsample(yTick,2));
+    ax.XTickLabel = ax.XTick.*Resolution;
+    ax.YTickLabel = ax.YTick.*Resolution;
     
     figure(5); hold on;
     s = surf(X, Y, depl);
@@ -489,8 +504,15 @@ else
     direction = [0 0 1];
     rotate(s, direction,-90);
     colorbar;
-    title('Surface profile of the displacement norm');
-    
+%     title('Surface profile of the displacement norm');
+    ax = gca;
+    xTick = get(ax,'XTick');
+    set(ax,'XTick',downsample(xTick,2));
+    yTick = get(ax,'YTick');
+    set(ax,'YTick',downsample(yTick,2));
+    ax.XTickLabel = ax.XTick.*Resolution;
+    ax.YTickLabel = ax.YTick.*Resolution;
+
     figure(6); hold on;
     s2 = surf(X, Y, abs(fourier));
     s2.EdgeColor = 'none';
@@ -533,9 +555,16 @@ else
     direction = [0 0 1];
     rotate(s3, direction,-90);
     colorbar;
-    title('Surface profile');
-    xlabel('x');
-    ylabel('y');
+%     title('Surface profile');
+%     xlabel('x');
+%     ylabel('y');
+    ax = gca;
+    xTick = get(ax,'XTick');
+    set(ax,'XTick',downsample(xTick,2));
+    yTick = get(ax,'YTick');
+    set(ax,'YTick',downsample(yTick,2));
+    ax.XTickLabel = ax.XTick.*Resolution;
+    ax.YTickLabel = ax.YTick.*Resolution;
     
     if (use_correl)
         [yi, ya] = meshgrid(1:length(fourier_I2_corr(1,:)),1:length(fourier_I2_corr(:,1)));

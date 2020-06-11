@@ -3,22 +3,55 @@ function [positions, thetas, sins] = classorbits( xi, yi, ri, si, numbounds, col
 close all;
 clc;
 
-%% Examples
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Author : Olivier Leblanc
+% Date : 24/05/2020
+%
+% Function :
+% Allows to simulate the trajectories of an inelastic ball inside a
+% circular, elliptical or stadium geometry by choosing the initial
+% conditions. Plots the result both in the space and in the phase space
+%
+% Inputs :
+% - (xi, yi) : 2D coordinates of the initial position
+% - (ri, si) : 2D coordinates of the initial direction of motion
+% - numbounds : number of bounds on the borders
+% - colorplot : color of the line describing the trajectories
+%
+% Outputs :
+% /.
+%
+%
+% Examples
+%
+% %%%% The simple horizontal line %%%% 
+% [positions, thetas, sins] = classorbit( 0, 0, 1, 0, 2, 'b' );
+%
+% %%%% The diamond %%%% 
+% [positions, thetas, sins] = classorbit( 0, -1, 2, 1, 16, 'b' );
+%
+% %%%% The rectangle %%%% 
+% [positions, thetas, sins] = classorbit( 1+sqrt(2)/2, 0, 0, 1, 10, 'b' );
+%
+% %%%% Few iterations in chaotic case %%%% 
 % [positions, thetas, sins] = classorbit( 0.5, 0, 0.1, 1, 100, 'b' );
-
+%
+% %%%% Lots of iterations in chaotic case %%%% 
 % [positions, thetas, sins] = classorbit( 0, 0, 1, 1, 5000, 'b' );
-
+%
 % [positions, thetas, sins] = classorbit( 0, 0.99, 1, 0, 16, 'b' );
-
-%% Options
-
+% 
+%
+% Options
 cavity = 'stadium'; % 'ellipse' or 'stadium'
 yax = 'sin'; % Choose between 'sin' and 'cos'
-colorscatter = 'g';
-scattersize = 20;
+colorscatter = 'r';
+scattersize = 10;
 dev = 1;  % Distance between the two semicircles for a stadium.  (0 for circle)
 excplus = 0; % Difference from one for the 'a' term of ellipse eq.: (x/a)^2+y^2=1
+
+show_subplots = 0; % Shows two examples for the report
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Code
 
@@ -29,10 +62,11 @@ s=si;
 
 % axes('position',[0 0 1 1]);
 fig1 = figure(1); hold on;
+set(gca,'TickLabelInterpreter','Latex', 'FontSize', 16.0);
 set(fig1, 'Visible','off');
-xlabel('x');
-ylabel('y');
-title('Trajectories in the geometry');
+xlabel('x', 'interpreter', 'latex', 'FontSize', 18.0);
+ylabel('y', 'interpreter', 'latex', 'FontSize', 18.0);
+title('Trajectories in the geometry', 'interpreter', 'latex', 'FontSize', 16.0);
 
 % Plot the cavity
 if (strcmp(cavity, 'stadium'))
@@ -56,18 +90,20 @@ elseif (strcmp(cavity, 'ellipse'))
 end
 hold on;
 
-
 % Phase-space plot
 fig2 = figure(2); hold on;
+axis([-0.5 3.5 -1.2 1.2]);
+grid on;
+set(gca,'TickLabelInterpreter','Latex', 'FontSize', 18.0);
 set(fig2, 'position',[800 200 500 500]);
 set(fig2, 'Visible','off');
-xlabel('\theta');
+xlabel('$\theta$', 'interpreter', 'latex', 'FontSize', 20.0);
 if (strcmp(yax, 'sin'))
-    ylabel('sin(i)');
+    ylabel('$\sin (i)$', 'interpreter', 'latex', 'FontSize', 20.0);
 elseif (strcmp(yax, 'cos'))
-    ylabel('cos(i)');
+    ylabel('$ \cos (i)$', 'interpreter', 'latex', 'FontSize', 20.0);
 end
-title('Phase space plot');
+title('Phase space plot', 'interpreter', 'latex', 'FontSize', 18.0);
 hold on;
 sz = 25;
 c = linspace(1,10,numbounds);
@@ -79,7 +115,7 @@ if (numbounds < 75000)
     positions = zeros(2, numbounds+1);
     thetas = zeros(1, numbounds);
     sins = zeros(1, numbounds);
-    
+
     % Initialization
     positions(:,1) = [p;q];
     
@@ -100,7 +136,7 @@ if (numbounds < 75000)
             sins(iter) = cos(asin(sinus));
         end
         positions(: , iter+1) = [po; qo];
-        plot([p po], [q qo], colorplot, 'LineWidth', 1.0);
+        plot([p po], [q qo], colorplot, 'LineWidth', 0.05);
         
         % Update current condition
         p = po;
@@ -164,8 +200,7 @@ else
         r=ro;
         s=so;
     end
-    
-    
+       
     % To return smt
     positions = 0;
     thetas = 0;
@@ -177,6 +212,83 @@ set(fig1, 'Visible','on');
 set(fig2, 'Visible','on');
 toc;
 
+if (show_subplots)
+%%%%%%%%%%%%%%%%%%%%%% Subplots %%%%%%%%%%%%%%%%%%%%%%%
+fig3 = figure(3); hold on;
+set(gca,'TickLabelInterpreter','Latex', 'FontSize', 12.0);
+
+% stadiums
+subplot(2,2,1); hold on;
+title('Trajectories in the geometry', 'interpreter', 'latex');
+    plot([-dev dev],[1,1],'k');
+    plot([-dev dev],[-1,-1],'k');
+    y=linspace(-1,1,100);
+    xx=-sqrt(1.-y.^2)-dev;
+    plot(xx,y,'k');
+    xx=sqrt(1.-y.^2)+dev;
+    plot(xx,y,'k');
+    ylabel('y', 'interpreter', 'latex');
+    
+subplot(2,2,3); hold on;
+    plot([-dev dev],[1,1],'k');
+    plot([-dev dev],[-1,-1],'k');
+    y=linspace(-1,1,100);
+    xx=-sqrt(1.-y.^2)-dev;
+    plot(xx,y,'k');
+    xx=sqrt(1.-y.^2)+dev;
+    plot(xx,y,'k');
+xlabel('x', 'interpreter', 'latex');
+ylabel('y', 'interpreter', 'latex');
+
+% First orbit
+subplot(2,2,1);
+thetas = zeros(1, 2);
+sins = zeros(1, 2);
+for iter=1:2
+    % Find data for the next bound
+    [po qo ro so sinus]=nextref(p,q,r,s); 
+    % Save current data
+    thetas(iter) = atan2(qo,po);
+    sins(iter) = sinus;
+    plot([p po], [q qo], colorplot, 'LineWidth', 1.0);
+    % Update current condition
+    p = po;
+    q = qo;
+    r=ro;
+    s=so;
+end
+
+% First phase space
+subplot(2,2,2); grid on; axis([-0.5 3.5 -1.2 1.2]); hold on;
+scatter(thetas, sins, scattersize, colorscatter,'filled');
+title('Phase space plot', 'interpreter', 'latex');
+ylabel('$\sin (i)$', 'interpreter', 'latex');
+
+% Second orbits
+p = 0; q = -1; r = 2; s = 1;
+subplot(2,2,3);
+thetas = zeros(1, 4);
+sins = zeros(1, 4);
+for iter=1:4
+    % Find data for the next bound
+    [po qo ro so sinus]=nextref(p,q,r,s); 
+    % Save current data
+    thetas(iter) = atan2(qo,po);
+    sins(iter) = sinus;
+    plot([p po], [q qo], colorplot, 'LineWidth', 1.0);
+    % Update current condition
+    p = po;
+    q = qo;
+    r=ro;
+    s=so;
+end
+
+% Second phase space
+subplot(2,2,4); grid on; axis([-0.5 3.5 -1.2 1.2]); hold on;
+scatter(thetas, sins, scattersize, colorscatter,'filled');
+xlabel('$\theta$', 'interpreter', 'latex');
+ylabel('$\sin (i)$', 'interpreter', 'latex');
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Function taken from "Qstad library" and modified to computed sin_i and

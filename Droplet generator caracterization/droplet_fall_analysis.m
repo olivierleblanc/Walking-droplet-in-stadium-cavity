@@ -15,7 +15,7 @@ clc;
 %% Options
 find_pixel2mm = 0;
 estim_diam = 0;
-show_images = 0;
+show_images = 1;
 show_found_droplets = 0; %1-estim_diam
 
 give_boxplot = 1;
@@ -30,12 +30,21 @@ folder_name = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Droplet_Gener
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directory name
-directory = 'nozzle3_pulse5000_voltage50';
-im_name = 'drop';
+directory = 'ajd';
+im_name = 'ajd';
 image_format = '.jpeg';
 numdrop = 20; % Number of created droplets
-first_image = 1;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+first_image = 0;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Directory name
+% directory = 'nozzle3_pulse5000_voltage50';
+% im_name = 'drop';
+% image_format = '.jpeg';
+% numdrop = 20; % Number of created droplets
+% first_image = 1;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Automatically find the number of files in the folder.
 % Numbers of images in the folder or to treat.
@@ -95,9 +104,9 @@ if (estim_diam)
     set(fig1, 'position',[0 200 500 500]);
     
     i = 1;
-    for ind=first_image:subsample:number_of_images
-        % for ind=2:subsample:150
-%             for ind=324:subsample:324
+        for ind=first_image:subsample:number_of_images
+%     for ind=680:680
+        %             for ind=324:subsample:324
         
         I2 = imread([folder_name, directory, '\', im_name, '_', sprintf('%06d',ind), image_format]);
         I2 = I2(ROI_indx, ROI_indy, :);
@@ -143,18 +152,46 @@ if (estim_diam)
             title('Original');
             imshow(I2);
             axis on;
+            ax = gca;
+            xTick = get(ax,'XTick');
+            set(ax,'XTick',downsample(xTick,2));
+            yTick = get(ax,'YTick');
+            set(ax,'YTick',downsample(yTick,2));
+            ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+            ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
             subplot(1,4,2); hold on;
             title('Difference with ref.');
             imshow(I3.*5);
             axis on;
+            ax = gca;
+            xTick = get(ax,'XTick');
+            set(ax,'XTick',downsample(xTick,2));
+            yTick = get(ax,'YTick');
+            set(ax,'YTick',downsample(yTick,2));
+            ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+            ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
             subplot(1,4,3); hold on;
             title('Binary image');
             imshow(I4);
             axis on;
+            ax = gca;
+            xTick = get(ax,'XTick');
+            set(ax,'XTick',downsample(xTick,2));
+            yTick = get(ax,'YTick');
+            set(ax,'YTick',downsample(yTick,2));
+            ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+            ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
             subplot(1,4,4); hold on;
             title('Wo salt and pepper');
             imshow(I5.*255);
             axis on;
+            ax = gca;
+            xTick = get(ax,'XTick');
+            set(ax,'XTick',downsample(xTick,2));
+            yTick = get(ax,'YTick');
+            set(ax,'YTick',downsample(yTick,2));
+            ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+            ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
             set(fig1, 'Name',['Analyzing ', num2str(ind), '-th image']);
             drawnow;
         end
@@ -193,19 +230,47 @@ if (show_found_droplets)
         title('Original');
         imshow(I2);
         axis on;
+        ax = gca;
+        xTick = get(ax,'XTick');
+        set(ax,'XTick',downsample(xTick,2));
+        yTick = get(ax,'YTick');
+        set(ax,'YTick',downsample(yTick,2));
+        ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+        ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
         subplot(1,4,2); hold on;
         title('Difference with ref.');
         imshow(I3.*5);
         axis on;
+        ax = gca;
+        xTick = get(ax,'XTick');
+        set(ax,'XTick',downsample(xTick,2));
+        yTick = get(ax,'YTick');
+        set(ax,'YTick',downsample(yTick,2));
+        ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+        ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
         subplot(1,4,3); hold on;
         title('Binary image');
         imshow(I4);
         axis on;
+        ax = gca;
+        xTick = get(ax,'XTick');
+        set(ax,'XTick',downsample(xTick,2));
+        yTick = get(ax,'YTick');
+        set(ax,'YTick',downsample(yTick,2));
+        ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+        ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
         subplot(1,4,4); hold on;
         title('Wo salt and pepper');
         imshow(I5.*255);
         axis on;
         set(fig3, 'Name',['Analyzing ', num2str(image_with_drop(i)), '-th image']);
+        ax = gca;
+        xTick = get(ax,'XTick');
+        set(ax,'XTick',downsample(xTick,2));
+        yTick = get(ax,'YTick');
+        set(ax,'YTick',downsample(yTick,2));
+        ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e2)./1e2;
+        ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e2)./1e2;
         drawnow;
         pause(1.5);
     end
@@ -230,11 +295,11 @@ if (give_boxplot)
     arr(1)=[];
     x(1) = [];
     boxplot(arr, x); hold on;
-    xlabel('Test index');
-    ylabel('Droplet diameter [mm]');
+    xlabel('Test index','interpreter','latex');
+    ylabel('Droplet diameter [mm]','interpreter','latex');
+    set(gca,'TickLabelInterpreter','Latex');
     ax = gca;
-ax.FontSize = 12;
-ax.FontWeight = 'bold';
+    ax.FontSize = 12;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

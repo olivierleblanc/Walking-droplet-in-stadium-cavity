@@ -17,7 +17,7 @@ baudrate = 250000;      % baudrate imposed by the Arduino Uno code
 %
 % Options :
 newreading = 1;         % If 0 : only show the FFT of already saved data
-True_meas = 0;          % If 0, use artificial data
+True_meas = 1;          % If 0, use artificial data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 close all;

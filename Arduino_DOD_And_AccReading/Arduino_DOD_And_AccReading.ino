@@ -109,10 +109,10 @@ void loop() {
       digitalWrite(orangePin, LOW);
       digitalWrite(yellowPin, HIGH);
       //delay(5);
-      delayMicroseconds(4290);
+      delayMicroseconds(4700);
       digitalWrite(orangePin, HIGH);
       digitalWrite(yellowPin, LOW);
-      //delay(50);
+      delay(500);
       //delayMicroseconds(10000);
     }
     

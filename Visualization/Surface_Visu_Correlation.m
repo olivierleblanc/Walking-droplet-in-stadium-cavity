@@ -16,9 +16,9 @@
 % /.
 %
 % Options :
-analyze_video = 1; % 0 for analyzing a directory of images
+% analyze_video  % 0 for analyzing a directory of images
 define_resolution = 0;
-define_ROI = 1;
+define_ROI = 0;
 lighting_effects = 0;  % Enhance surface visualization with ligthning effect
 true_height = 0;    % 1 : gives true reconstructed height. 0 : gives height difference from equilibrium
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,15 +27,19 @@ close all;
 clc;
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% analyze_video = 0; % 0 for analyzing a directory of images
 % folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Images\';
-% dir = '10-04-20_circle';   % Directory name
+% directory = '10-04-20_circle';   % Directory name
 % filename = 'circle';
-% ref_num = 1;   % Number of the reference image
+% format = '.jpeg';
+% ref_num = 10;   % Number of the reference image
 % cur_num = 196;
 % ref_length = 0.02;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% analyze_video = 0; % 0 for analyzing a directory of images
 % folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Images\';
 % dir = '09-04-20_App';   % Directory name
 % filename = 'app';
@@ -45,6 +49,7 @@ clc;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% analyze_video = 0; % 0 for analyzing a directory of images
 % folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Images\';
 % dir = '10-04-20_drop';   % Directory name
 % filename = 'drop';
@@ -54,6 +59,7 @@ clc;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% analyze_video = 0; % 0 for analyzing a directory of images
 % folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Images\';
 % dir = '10-04-20_faraday';   % Directory name
 % filename = 'faraday';
@@ -66,26 +72,18 @@ clc;
 %% Parameters
 window_size = 16;
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Video_Recordings\';
-directory = '';   % Directory name
-filename = '10-04-20_faraday';
-format = '.MOV';
+analyze_video = 0; % 0 for analyzing a directory of images
+folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Images\';
+directory = '10-04-20_circle';   % Directory name
+filename = 'circle';
+format = '.jpeg';
 ref_num = 10;   % Number of the reference image
-% cur_num = 290;
-cur_num = 1500;
+cur_num = 196;
 ref_length = 0.02;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% %%%%%%%%%%%%%%%%%%%%%%%%% Video settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Video_Recordings\';
-% directory = '';   % Directory name
-% filename = '16-05-20';
-% format = '.MTS';
-% ref_num = 75;   % Number of the reference image
-% cur_num = 500;
-% ref_length = 0.09;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Physical system values
 lambda = 4.72e-3;   % Typical wavelength
@@ -102,7 +100,7 @@ if (analyze_video)
     % /!\ When the video is a MTS file, it gives 50 FPS instead of the true 25 FPS.
     number_of_images = floor(obj.Duration*obj.FrameRate/2);
 else
-    % number_of_images = numel(dir([folder_name, directory,'\*', image_format]))-1;    % Numbers of images in the folder or to treat
+    number_of_images = numel(dir([folder, directory,'\*', format]))-1;    % Numbers of images in the folder or to treat
 end
 
 % Load reference image
@@ -131,7 +129,7 @@ if (define_resolution)
     [xl, yl] = ginput(1);
     title('\color{red} please click on the right side of the gray base', 'FontSize', 20);
     [xr, yr] = ginput(1);
-    pixel2mm = ref_length/(xr-xl);
+    pixel2mm = ref_length/(sqrt((xr-xl)^2+(yr-yl)^2));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (define_ROI)
@@ -198,15 +196,30 @@ f1 = figure(1); hold on;
 set(f1, 'position',[0 200 500 500]);
 imshow(Iref_ROI);
 axis on;
-title('Reference image');
+% title('Reference image');
+% xlabel('X [m]');
+% ylabel('Y [m]');
+ax = gca;
+xTick = get(ax,'XTick');
+set(ax,'XTick',downsample(xTick,2));
+yTick = get(ax,'YTick');
+set(ax,'YTick',downsample(yTick,2));
+ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e4)./1e4;
+ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e4)./1e4;
 drawnow;
 
 f2 = figure(2); hold on;
 set(f2, 'position',[400 200 500 500]);
-axis on;
-title('Modified image');
 imshow(I2_ROI);
 axis on;
+% title('Modified image');
+ax = gca;
+xTick = get(ax,'XTick');
+set(ax,'XTick',downsample(xTick,2));
+yTick = get(ax,'YTick');
+set(ax,'YTick',downsample(yTick,2));
+ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e4)./1e4;
+ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e4)./1e4;
 drawnow;
 
 f20 = figure(20); hold on;
@@ -296,6 +309,13 @@ s2 = surf(X, Y, dx);
 s2.EdgeColor = 'none';
 colorbar;
 title('dx');
+ax = gca;
+xTick = get(ax,'XTick');
+set(ax,'XTick',downsample(xTick,2));
+yTick = get(ax,'YTick');
+set(ax,'YTick',downsample(yTick,2));
+ax.XTickLabel = ax.XTick.*pixel2mm;
+ax.YTickLabel = ax.YTick.*pixel2mm;
 
 f4 = figure(4); hold on;
 set(f4, 'position',[800 100 500 500]);
@@ -311,11 +331,11 @@ title('dy');
 % colorbar;
 % title('FFT2');
 
-f7 = figure(10); hold on;
+f7 = figure(7); hold on;
 set(f7, 'position',[800 200 500 500]);
 s3 = surf(X,Y,h);
 s3.EdgeColor = 'none';
-title(['Surface profile of ', num2str(cur_num), '-th image']);
+% title(['Surface profile of ', num2str(cur_num), '-th image']);
 grid on;
 if (lighting_effects)
     light               % create a light
@@ -324,7 +344,14 @@ end
 L = max(wx, hy);
 axis([0 L 0 L]);
 direction = [0 0 1];
-rotate(s3, direction,-90); 
+rotate(s3, direction,-90);
 colorbar;
-xlabel('x');
-ylabel('y');
+% xlabel('x');
+% ylabel('y');
+ax = gca;
+xTick = get(ax,'XTick');
+set(ax,'XTick',downsample(xTick,2));
+yTick = get(ax,'YTick');
+set(ax,'YTick',downsample(yTick,2));
+ax.XTickLabel = round(ax.XTick.*pixel2mm.*1e4)./1e4;
+ax.YTickLabel = round(ax.YTick.*pixel2mm.*1e4)./1e4;

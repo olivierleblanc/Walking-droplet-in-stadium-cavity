@@ -23,9 +23,9 @@ plot_L_histogram = 1;
 close all;
 clc;
 
-directory = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Experiments\08-06-20\';
-filename = 'drop_position_62.mat';
-videoname = '00062_f80_1910_M_D105.MTS';
+directory = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Experiments\07-06-20_v07\';
+filename = 'drop_position_58.mat';
+videoname = '00057_f80_2090_D080.MTS';
 load([directory, filename]);
 
 obj = VideoReader([directory, videoname]);
@@ -101,7 +101,7 @@ if( plot_pos_histogram)
     imshow(I1); colorbar; hold on;
     hist3(drop_position, 'Nbins', [60,40], 'CDataMode','auto','FaceColor','interp');
     axis on;
-    axis([200, 850, 280,600]);
+    axis([200, 950, 280,650]);
     hold on;
     set(gca,'TickLabelInterpreter','Latex', 'FontSize', 14.0);
     ax = gca;
