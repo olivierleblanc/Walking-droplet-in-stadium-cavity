@@ -64,9 +64,15 @@ s=si;
 fig1 = figure(1); hold on;
 set(gca,'TickLabelInterpreter','Latex', 'FontSize', 16.0);
 set(fig1, 'Visible','off');
-xlabel('x', 'interpreter', 'latex', 'FontSize', 18.0);
-ylabel('y', 'interpreter', 'latex', 'FontSize', 18.0);
-title('Trajectories in the geometry', 'interpreter', 'latex', 'FontSize', 16.0);
+% xlabel('x', 'interpreter', 'latex', 'FontSize', 18.0);
+% ylabel('y', 'interpreter', 'latex', 'FontSize', 18.0);
+% title('Trajectories in the geometry', 'interpreter', 'latex', 'FontSize', 16.0);
+axis off;
+% plot(-1,0,'xk', 'MarkerSize', 5.0);
+% plot(1,0,'xk', 'MarkerSize', 5.0);
+% plot([1, 1], [-1, 1],'-.k', 'LineWidth', 0.1);
+% plot([-1, -1], [-1, 1],'-.k', 'LineWidth', 0.1);
+
 
 % Plot the cavity
 if (strcmp(cavity, 'stadium'))
@@ -136,7 +142,7 @@ if (numbounds < 75000)
             sins(iter) = cos(asin(sinus));
         end
         positions(: , iter+1) = [po; qo];
-        plot([p po], [q qo], colorplot, 'LineWidth', 0.05);
+%         plot([p po], [q qo], colorplot, 'LineWidth', 0.05);
         
         % Update current condition
         p = po;

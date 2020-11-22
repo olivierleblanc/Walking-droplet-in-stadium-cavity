@@ -26,31 +26,41 @@ clc;
 % % Directory name
 % analyze_video = 0;  % 0 for analyzing a directory of images
 % folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Experiments\24-04-20_Me5_9';
-% directory = '';
 % filename = 'drop';
 % format = '.jpg';
 % ref_length = 0.09;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Directory name
+% analyze_video = 1;  % 0 for analyzing a directory of images
+% folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Experiments\24-04-20_Me6_1';
+% filename = 'P1060751';
+% format = '.MOV';
+% ref_length = 0.085;
+% list = 3000:50:4000;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directory name
-analyze_video = 1;  % 0 for analyzing a directory of images
-folder = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Experiments\24-04-20_Me6_1';
-directory = '';
+analyze_video = 0;  % 0 for analyzing a directory of images
+folder = 'C:\Users\leblanco.OASIS\Documents\IngeCivilMaster2\Memoire\Liege_Data\J2_23-10\2_G_4_00\';
 filename = 'P1060751';
-format = '.MOV';
-ref_length = 0.085;
-list = 3000:50:4000;
+format = '.jpg';
+ref_length = 0.095;
+list = 100:50:1000;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Num_droplets = 1;
-text = [folder, directory, '\', filename, '_'];
+text = [folder, filename, '_'];
 if (analyze_video)
-    obj = VideoReader([folder, directory, '\', filename, format]);
+    obj = VideoReader([folder, filename, format]);
     number_of_images = length(list);
 else
-    number_of_images = numel(dir([folder, directory,'\*', format]))-1;    % Numbers of images in the folder or to treat
+    names = dir([folder, '*', format]);
+    number_of_images = numel(dir([folder, '*', format]))-1;    % Numbers of images in the folder or to treat
 end
 
 f1 = figure(1); hold on;
@@ -62,7 +72,7 @@ if (define_resolution)
     if (analyze_video)
         I1 = read(obj, 1);
     else
-        I1 = imread([text, sprintf('%06d',1), image_format]);
+        I1 = imread([folder, names(1).name]);
     end
     [Im_res_y, Im_res_x, ~] = size(I1); % Finds the orientation and resolution of the images.
     imshow(I1);
@@ -93,7 +103,7 @@ for i = 1:number_of_images
     if (analyze_video)
         I1 = read(obj, j);
     else
-        I1 = imread([folder, directory, '\', filename, '_', sprintf('%06d',i), format]);
+        I1 = imread([folder, names(i).name]);
     end
     figure(1);
     imshow(I1);
@@ -116,7 +126,7 @@ for i = 1:number_of_images
     if (analyze_video)
         I1 = read(obj, j);
     else
-        I1 = imread([text, sprintf('%06d', i), format]);
+        I1 = imread([folder, names(i).name]);
     end 
     I1_corr = I1([corrzone(1,:)],[corrzone(2,:)]);
     % Interpolate the image by 'factor'
