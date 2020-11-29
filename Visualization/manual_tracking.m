@@ -37,6 +37,7 @@ first_image = 579;
 last_image = 1e5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Code
 % Automatically find the number of image files in the folder.
 if (analyze_video)
     obj = VideoReader([directory, directory, filename, image_format]);
@@ -95,7 +96,6 @@ if (estim_diameter)
 end
 % ------------------------------------------------------------------------------
 
-%% Code
 
 % Initialization
 drop_position = zeros(Num_droplets*(last_image),2);
@@ -161,8 +161,8 @@ if (show_true_trajectory)
         Inew = double(read(obj, first_image+space_for_mean*n));
         I_diff = Inew-Ipre;
         Ipre = Inew;
-        % Mettre un facteur qui dépende de l'intensité moyenne!!
-        %         weights = I_diff./(100/nb_for_mean);
+        % The 1000 factor may be modified depending on the mean intensity
+        % and the number of images
         weights = I_diff./(1000/nb_for_mean);
         Iref = Iref + Inew.*(1 + weights);
     end
@@ -200,7 +200,6 @@ if (show_tracked_trajectory)
     %     scatter(drop_position(1,1),drop_position(1,2), 'b');
     scatter(round(xi), round(yi), 'b');
     n = length(drop_position(:,1));
-    % put "+ 50" only to shift tracked trajectory and compare with mean of images
     p = plot(drop_position(:,1)  ,drop_position(:,2) , 'r', 'LineWidth', 1.0); hold on;
     % modified jet-colormap
     cd = [uint8(jet(n)*255) uint8(ones(n,1))].';
