@@ -12,7 +12,7 @@
 % /.
 %
 % Options :
-analyze_video = 1; % 0 for analyzing a directory of images
+analyze_video = 0; % 0 for analyzing a directory of images
 estim_diameter = 0; % If the use wishes to estimate the droplet diameter
 show_tracked_trajectory = 1;
 show_true_trajectory = 0;
@@ -22,29 +22,30 @@ close all;
 clc;
 
 %% Parameters
-Image_dist = 2; % Initial spacing (in images numbers) between the actual reference image and the analyzed image
+Image_dist = 1; % Initial spacing (in images numbers) between the actual reference image and the analyzed image
 Num_droplets = 1; % Number of droplets to track
+halfwidth = 150; % For the ROI size
 
 % Informations varying with the analyzed video sequence :
-folder_name = 'C:\Users\Leblanc\Documents\IngeCivilMaster2\Memoire\Visualization\Video_Recordings\';
-
+directory = 'C:\Users\leblanco.OASIS\Documents\IngeCivilMaster2\Memoire\Liege_Data\J7_20_11\';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directory name
-directory = '';
-filename = '18-05-20_eigen';
-image_format = '.MTS';
+im_folder = '5_G_4_335_C\';
+image_format = 'jpg';
 ref_length = 0.09;
-first_image = 3;
-last_image = 600;
+first_image = 579;
+last_image = 1e5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-obj = VideoReader([folder_name, directory, filename, image_format]);
 % Automatically find the number of image files in the folder.
 if (analyze_video)
+    obj = VideoReader([directory, directory, filename, image_format]);
     % /!\ When the video is a MTS file, it gives 50 FPS instead of the true 25 FPS.
     number_of_images = floor(obj.Duration*obj.FrameRate/2);
 else
-    number_of_images = numel(dir([folder_name, directory,'\*', image_format]))-1;    % Numbers of images in the folder or to treat
+    text = [directory, im_folder];
+    number_of_images = numel(dir([text,'*.', image_format]))-1;    
+    imnames = dir([text, '*.', image_format]);
 end
 
 if (last_image > number_of_images)
@@ -58,9 +59,9 @@ figure(10); hold on;
 if (analyze_video)
     I1 = read(obj, first_image-2);
 else
-    I1 = imread([folder_name, directory, '\', filename, '_', sprintf('%06d',first_image), image_format]);
+    I1 = imread([text, imnames(first_image).name]);
 end
-[Im_res_y, Im_res_x, ~] = size(I1); % Finds the orientation and resolution of the images.
+[H, W, ~] = size(I1); % Finds the orientation and resolution of the images.
 imshow(I1);
 colorbar;
 axis on;
@@ -69,8 +70,8 @@ title('\color{red} please click on the droplet to define its initial coordinates
 ROI_centers = [round(yi); round(xi)];
 % Strucure containing y ROI values on the first row, and x ROI values on
 % the second row, repeated Num_droplets times.
-ROI = repmat([[ROI_centers(1,1)-half_ROI_size+1 : ROI_centers(1,1)+half_ROI_size] ;...
-    [ROI_centers(2,1)-half_ROI_size+1 : ROI_centers(2,1)+half_ROI_size]],1,Num_droplets);
+ROIx = max(1,ROI_centers(2)-halfwidth) : min(W,ROI_centers(2)+halfwidth);
+ROIy = max(1,ROI_centers(1)-halfwidth) : min(H,ROI_centers(1)+halfwidth);
 close(figure(10));
 % ------------------------------------------------------------------------------
 
@@ -80,10 +81,10 @@ if (estim_diameter)
     if (analyze_video)
         I1 = read(obj, first_image-1);
     else
-        I1 = imread([text, sprintf('%06d',first_image), image_format]);
+        I1 = imread([text, imnames(first_image).name]);
     end
     I1_corr = I1([corrzone(1,:)],[corrzone(2,:)]);
-    I1_ROI = I1([ROI(1,:)],[ROI(2,:)]);
+    I1_ROI = I1(ROIy, ROIx);
     figure(1); hold on;
     imshow(I1_corr);
     axis on;
@@ -114,9 +115,9 @@ while (i+Image_dist < last_image)
     if (analyze_video)
         Iref = rgb2gray(read(obj, i));
     else
-        Iref = rgb2gray(imread([text, sprintf('%06d',i), image_format]));
+        Iref = imread([text, imnames(i).name]);
     end
-    Iref_ROI = Iref([ROI(1,:)],[ROI(2,:)]);
+    Iref_ROI = Iref(ROIy, ROIx);
     
     imshow(Iref_ROI);
     title(['\color{red} Click on the droplet. Image :', num2str(i)], 'FontSize', 20);
@@ -124,8 +125,8 @@ while (i+Image_dist < last_image)
     x = round(x);
     y = round(y);
     
-    x_true = x + ROI_centers(2,1) - half_ROI_size;
-    y_true = y + ROI_centers(1,1) - half_ROI_size;
+    x_true = x + ROIx(1);
+    y_true = y + ROIy(1);
     
     % Saving current position
     drop_position(i+Image_dist,:) = [x_true,y_true];
@@ -133,9 +134,8 @@ while (i+Image_dist < last_image)
     
     % Updates
     i = i+Image_dist;
-    ROI_centers = [y_true; x_true];
-    ROI = repmat([[ROI_centers(1,1)-half_ROI_size+1 : ROI_centers(1,1)+half_ROI_size] ;...
-        [ROI_centers(2,1)-half_ROI_size+1 : ROI_centers(2,1)+half_ROI_size]],1,Num_droplets);
+    ROIx = max(1,x_true-halfwidth) : min(W,x_true+halfwidth);
+    ROIy = max(1,y_true-halfwidth) : min(H,y_true+halfwidth);
 end
 
 drop_position(find(drop_position(:,1)==0), :) = [];
@@ -152,9 +152,9 @@ if (show_true_trajectory)
     if (analyze_video)
         Iref = double(read(obj, first_image));
         Ipre = double(read(obj, first_image));
-    else
-        Iref = double(imread([text, sprintf('%06d', first_image), image_format]));
-        Ipre = double(imread([text, sprintf('%06d', first_image), image_format]));
+    else       
+        Iref = double(imread([text, imnames(first_image).name]));
+        Ipre = Iref;
     end
     for n = 1:nb_for_mean
         %         Inew = double(imread([text, sprintf('%06d', first_image+space_for_mean*n), image_format]));

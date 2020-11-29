@@ -1,6 +1,5 @@
 function ax = latexfig(gca, pixel2mm)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%
     set(gca,'TickLabelInterpreter','Latex', 'FontSize', 14.0);
     ax = gca;
     xTick = get(ax,'XTick');

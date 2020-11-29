@@ -1,9 +1,9 @@
-% function [drop_position, time_spent] = Particle_Tracking_v2_Liege ()
-
-
 % Particle tracking
 % Author : Olivier Leblanc
 % Date : 19-11-2020
+
+% This routine is dedicated to the computing of walking droplet's position
+% from images captured on the experimental setup in Microfluidics Lab at ULiege.
 
 
 % Explains the principle.
@@ -11,54 +11,11 @@
 close all;
 clc;
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % Directory name
-% directory = 'Tracking2';
-% image_format = '.jpeg';
-% resolution = 60.0e-6;   % 1 pixel = a micrometer
-% first_image = 100;
-% last_image = 1500;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % Directory name
-% directory = '25-11-19_droplet1';
-% image_format = '.jpeg';
-% resolution = 150.0e-6;   % 1 pixel = a micrometer
-% first_image = 434;
-% last_image = 1500;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % Directory name
-% directory = '26-11-19_circle';
-% image_format = '.jpeg';
-% resolution = 24.3e-6;   % 1 pixel = a micrometer
-% first_image = 1;
-% last_image = 1500;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% Note : Pour le test ci-dessous, on remarque que le tracking jump de la
-% grosse à la petite goutte autour de "index_test"=169!
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % Directory name
-% directory = '03-12-19-DeuxGouttes';
-% image_format = '.jpeg';
-% resolution = 3.7037e-05;   % 1 pixel = a micrometer
-% first_image = 1;
-% last_image = 1500;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 %% Plot options
 
-show_each_ROI = 0;
-show_each_track = 0;
-show_each_mask = 0;
+show_each_ROI = 1;
+show_each_track = 1;
+show_each_mask = 1;
 
 show_true_trajectory = 0;
 show_tracked_trajectory = 1;
@@ -66,24 +23,25 @@ show_verify_position = 0;
 show_final_ROI = 0;
 
 %% Options
-subsample = 1;  % No if 1. Put 10 for test.
 define_ROI = 1;
+im_find_circles = 0;
 
 %% Parameters
 Num_droplets = 1; % Number of droplets to track
-halfwidth = 130; % For the ROI size
+halfwidth = 90; % For the ROI size
 
 % Informations varying with the analyzed video sequence :
-folder_name = 'C:\Users\leblanco.OASIS\Documents\IngeCivilMaster2\Memoire\Liege_Data\J6_18_11\';
+folder_name = 'C:\Users\leblanco.OASIS\Documents\IngeCivilMaster2\Memoire\Liege_Data\J5_17_11\';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-directory = '3_G_4_249';
+directory = 'G_4_40';
 image_format = '.jpg';
 image_color = 0;
 first_image = 1;
 last_image = 1e5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+width = 2*halfwidth;
 text = [folder_name, directory, '\'];
 names = dir([folder_name, directory,'\*', image_format]);
 number_of_images = numel(dir([text,'*', image_format]))-1;  % Numbers of images in the folder or to treat
@@ -140,10 +98,49 @@ if (show_tracked_trajectory)
     matx1 = repmat(1:Im_res_x,Im_res_y,1);
     maty1 = repmat(transpose(1:Im_res_y),1,Im_res_x);
 
-    if (show_each_track)
+
+    if (show_each_track + show_each_ROI + show_each_mask)
         fig16 = figure(16); hold on;
-        set(fig16, 'position',[0 0 800 800]);
-        colorbar; axis on; hold on;
+        set(fig16, 'position',[0 50 1000 600]);
+        ax0 = gca;
+        set(ax0,'visible','off');
+        % Top-left
+        axes1 = axes('Parent',fig16,...
+            'Position',[0.05 0.55 0.35 0.35]);
+        hold(axes1,'on');
+        set(axes1,'TickLabelInterpreter','Latex','FontSize',16); 
+        box(axes1,'on');
+        axis(axes1,'ij');
+        xlim(axes1,[0 wx]);
+        ylim(axes1,[0 hy]);
+        set(axes1,'TickLabelInterpreter','Latex','FontSize',16); 
+        % Bottom-left
+        axes2 = axes('Parent',fig16,...
+            'Position',[0.05 0.1 0.35 0.35]);
+        hold(axes2,'on');
+        set(axes2,'TickLabelInterpreter','Latex','FontSize',16); 
+        axis(axes2,'ij');
+        set(axes2,'TickLabelInterpreter','Latex','FontSize',16); 
+        xlim(axes2,[0 2*halfwidth]);
+        ylim(axes2,[0 2*halfwidth]);
+        % Right
+        axes3 = axes('Parent',fig16,'Position',[0.23 0.1 0.8 0.8]);
+        hold(axes3,'on');
+        axis(axes3,'ij');
+        set(axes3,'TickLabelInterpreter','Latex','FontSize',16); 
+        xlim(axes3,[0 wx]);
+        ylim(axes3,[0 hy]);
+        % Legend 
+        p1=plot(xm,ym,'^m','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',0.6);
+        p2=plot(indx(1)+xb,indy(1)+yb,'^','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',0.6);
+        p3=plot([indx(1),indx(1)], [indy(1),indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);   
+        p4=plot([ROIx(1), ROIx(1)], [ROIy(1), ROIy(end)],'Parent',axes3,'color','b', 'LineWidth', 2.0);  
+        p5=plot([ROIx(1)-width, ROIx(1)-width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);   
+        [h,icons]=legend(axes3, [p1,p2,p4,p5,p3], {'$\mathbf{x}_{m}$','$\mathbf{x}_{pos}$','$\mathcal{R}_{1}$','$\mathcal{R}_{1,ext}$','$\mathcal{R}_{2}$'}, 'Interpreter','Latex','FontSize', 18.0);
+        icons = findobj(icons,'Type','line');
+        set(icons,'MarkerSize',12);
+        set(h,'Position',[0.74 0.665 0.116 0.217],...
+            'Interpreter','latex','AutoUpdate','off');
     end
     % legend('Brightest pixel in the image difference','Gravity center of the mask','Most correlated point','Darkest point inside the ROI');
 
@@ -164,7 +161,7 @@ if (show_tracked_trajectory)
     I1 = imread([text, names(first_image).name]);
     I1 = I1(ymin:ymax,xmin:xmax);
     % ------------- Starting loop --------------
-    for i = first_image : last_image
+    for i = first_image : first_image+5 %last_image
         i
         tic;
         
@@ -186,12 +183,12 @@ if (show_tracked_trajectory)
         mask = ones( Im_res_y, Im_res_x );
         mask(5.*I1<30)=0;
         mask = remove_salt_and_pepper_noise(mask, kernel);
-%         mask = remove_salt_and_pepper_noise(mask, rect_42);
-%         mask = remove_salt_and_pepper_noise(mask, rect_42');
+        mask = remove_salt_and_pepper_noise(mask, rect_42);
+        mask = remove_salt_and_pepper_noise(mask, rect_42');
 
-        % Restric the mask around the previous location
-        mask([1:max(1,ROIy(1)-2*halfwidth), min(xmax, ROIy(end)+2*halfwidth):end], :) = 0;
-        mask(:, [1:max(1, ROIx(1)-2*halfwidth), min(ymax, ROIx(end)+2*halfwidth):end]) = 0;
+        % Restrict the mask around the previous location
+        mask([1:max(1,ROIy(1)-width), min(xmax, ROIy(end)+width):end], :) = 0;
+        mask(:, [1:max(1, ROIx(1)-width), min(ymax, ROIx(end)+width):end]) = 0;
         matx = matx1.*mask;
         maty = maty1.*mask;
         
@@ -212,42 +209,62 @@ if (show_tracked_trajectory)
 %         [val2 ycorr] = max(val);
 %         xcorr = xcorr(ycorr);
 
-        % Compute the darkest pixel in the ROI
+        % Compute the droplet's position, either with imfindcircles or darkest
         [val yb] = min(I2(indy,indx));
         [val2 xb] = min(val);
-        yb = yb(xb);
+        yb = yb(xb);        
+        if (im_find_circles)
+            [centers, radii, metric] = imfindcircles(round(I2(indy,indx)./4), [2, 5], 'Method', 'TwoStage', 'ObjectPolarity','dark');
+            if (length(radii)>0)
+                xb = round(centers(1,1));
+                yb = round(centers(1,2));
+            end
+        end
 
         if (show_each_mask)
-            subplot(2,2,1); imshow(mask);
+            imshow(mask, 'Parent', axes1);
+            plot(xm,ym, '^b','Parent',axes1, 'MarkerSize',8,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',1);
+            axis(axes1, 'on'); 
+            plot([ROIx(1)-width, ROIx(1)-width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);   % Left-side
+            plot([ROIx(end)+width, ROIx(end)+width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);  % right-side
+            plot([ROIx(1)-width, ROIx(end)+width], [ROIy(1)-width, ROIy(1)-width],'Parent',axes1,'color','g', 'LineWidth', 2.0);  % upper-side
+            plot([ROIx(1)-width, ROIx(end)+width], [ROIy(end)+width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);  % lower-side
         end
 
         if (show_each_track)
-    %         figure(16);
-            subplot(2,2,[2, 4]); imshow(I2); hold on;
-            scatter(xm,ym,'m');
-    %         scatter(x+ROIx(1)-(xcorr-round(H/2))+40, ycorr+y+ROIy(1)-round(W/2)+30,'g');
-            scatter(x+ROIx(1),y+ROIy(1),'b');
-            scatter(indx(1)+xb,indy(1)+yb,'r');
-            plot([indx(1), indx(1)], [indy(1), indy(end)],'b', 'LineWidth', 2.0);   % Left-side
-            plot([indx(end), indx(end)], [indy(1), indy(end)],'b', 'LineWidth', 2.0);  % right-side
-            plot([indx(1), indx(end)], [indy(1), indy(1)],'b', 'LineWidth', 2.0);  % upper-side
-            plot([indx(1), indx(end)], [indy(end), indy(end)],'b', 'LineWidth', 2.0);  % lower-side
-            plot([ROIx(1), ROIx(1)], [ROIy(1), ROIy(end)],'r', 'LineWidth', 2.0);   % Left-side
-            plot([ROIx(end), ROIx(end)], [ROIy(1), ROIy(end)],'r', 'LineWidth', 2.0);  % right-side
-            plot([ROIx(1), ROIx(end)], [ROIy(1), ROIy(1)],'r', 'LineWidth', 2.0);  % upper-side
-            plot([ROIx(1), ROIx(end)], [ROIy(end), ROIy(end)],'r', 'LineWidth', 2.0);  % lower-side
-            axis on;
-            title(['N°',num2str(i)]);
+            imshow(I2, 'Parent', axes3);
+            p1=plot(xm,ym,'^m','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',0.6);
+%             scatter(x+ROIx(1),y+ROIy(1),'Parent',axes3,'b');
+            plot(indx(1)+xb,indy(1)+yb,'^','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',0.6);
+            plot([indx(1),indx(1)], [indy(1),indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);   % Left-side
+            plot([indx(end), indx(end)], [indy(1), indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);  % right-side
+            plot([indx(1), indx(end)], [indy(1), indy(1)],'Parent',axes3,'color','m', 'LineWidth', 2.0);  % upper-side
+            plot([indx(1), indx(end)], [indy(end), indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);  % lower-side
+            plot([ROIx(1), ROIx(1)], [ROIy(1), ROIy(end)],'Parent',axes3,'color','b', 'LineWidth', 2.0);   % Left-side
+            plot([ROIx(end), ROIx(end)], [ROIy(1), ROIy(end)],'Parent',axes3,'color','b', 'LineWidth', 2.0);  % right-side
+            plot([ROIx(1), ROIx(end)], [ROIy(1), ROIy(1)],'Parent',axes3,'color','b', 'LineWidth', 2.0);  % upper-side
+            plot([ROIx(1), ROIx(end)], [ROIy(end), ROIy(end)],'Parent',axes3,'color','b', 'LineWidth', 2.0);  % lower-side
+            axis(axes3, 'on');
+            %             title(ax0, ['N°',num2str(i)]);
           end  
 
         if (show_each_ROI)
-    %         figure(12);
-            subplot(2,2,3); imshow(I2(indy,indx)); hold on;
-            scatter(xm-ROIx(1),ym-ROIy(1),'m');
-            scatter(xb,yb,'r');
-            scatter(x-indx(1)+ROIx(1),y-indy(1)+ROIy(1),'b');
+              imshow(I2(indy, indx), 'Parent', axes2);
+              plot([1 1], [1 width],'Parent',axes2,'color','m', 'LineWidth', 2.0);   % Left-side
+              plot([width width], [1, width],'Parent',axes2,'color','m', 'LineWidth', 2.0);  % right-side
+              plot([1 width], [1 1],'Parent',axes2,'color','m', 'LineWidth', 2.0);  % upper-side
+              plot([1 width], [width width],'Parent',axes2,'color','m', 'LineWidth', 2.0);  % lower-side
+            if (im_find_circles)
+                if (length(radii)>=2)
+                    viscircles(centers(1,:), radii(1),'EdgeColor','g');
+                    viscircles(centers(2,:), radii(2),'EdgeColor','m');
+                end
+            end
+            plot(xm-indx(1),ym-indy(1), '^b','Parent',axes2, 'MarkerSize',10,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',1.2);
+            plot(xb,yb,'^r','Parent',axes2, 'MarkerSize',10,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',1.2);
+%             plot(x-indx(1)+ROIx(1),y-indy(1)+ROIy(1),'^m','Parent',axes2, 'MarkerSize',10,'MarkerFaceColor','m','MarkerEdgeColor','k');
 %             scatter(xcorr, ycorr,'g');
-            axis on;
+            axis(axes2, 'on');
         end
 
         drawnow;
@@ -257,12 +274,7 @@ if (show_tracked_trajectory)
         ROIx = max(1,xb+indx(1)-halfwidth) : min(Im_res_x,xb+indx(1)+halfwidth);
         ROIy = max(1,yb+indy(1)-halfwidth) : min(Im_res_y,yb+indy(1)+halfwidth);
         
-%         I1=[];
         I1 = I2;
-%         I2=[];
-%         mask=[]; 
-%         matx=[]; 
-%         maty=[];
         
         time_spent(i) = toc;
     end
