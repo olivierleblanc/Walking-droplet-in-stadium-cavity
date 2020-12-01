@@ -1,45 +1,46 @@
-% Particle tracking
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author : Olivier Leblanc
-% Date : 19-11-2020
-
-% This routine is dedicated to the computing of walking droplet's position
+% Date : 19/11/2020
+%
+% Script :
+% This routine is dedicated to the computation of walking droplet position
 % from images captured on the experimental setup in Microfluidics Lab at ULiege.
-
-
-% Explains the principle.
-
-close all;
-clc;
-
-%% Plot options
-
+%
+% Inputs :
+% /.
+% Outputs :
+% /.
+%
+% Examples :
+% /.
+%
+% Plot options :
 show_each_ROI = 1;
 show_each_track = 1;
 show_each_mask = 1;
-
+%
 show_true_trajectory = 0;
 show_tracked_trajectory = 1;
 show_verify_position = 0;
 show_final_ROI = 0;
-
-%% Options
+%
+% Options :
 define_ROI = 1;
 im_find_circles = 0;
-
-%% Parameters
-Num_droplets = 1; % Number of droplets to track
+%
+% Parameters :
 halfwidth = 90; % For the ROI size
-
-% Informations varying with the analyzed video sequence :
 folder_name = 'C:\Users\leblanco.OASIS\Documents\IngeCivilMaster2\Memoire\Liege_Data\J5_17_11\';
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 directory = 'G_4_40';
 image_format = '.jpg';
-image_color = 0;
+image_color = 0; % put 1 if RGB images.
 first_image = 1;
 last_image = 1e5;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+close all;
+clc;
+
 
 width = 2*halfwidth;
 text = [folder_name, directory, '\'];
@@ -156,7 +157,7 @@ if (show_tracked_trajectory)
 %     fourier_imref_corr = fftshift(fft2(imref_window));
 %     sigma = 0.001;
 
-    drop_position = zeros(Num_droplets*last_image,2);
+    drop_position = zeros(last_image,2);
 
     I1 = imread([text, names(first_image).name]);
     I1 = I1(ymin:ymax,xmin:xmax);
@@ -295,13 +296,11 @@ if (show_tracked_trajectory)
     set(gca,'Ydir','reverse');
     scatter(drop_position(1,1)-xmin,drop_position(1,2)-ymin, 'b');
     n = length(drop_position(:,1));
-    % put "+ 50" only to shift tracked trajectory and compare with mean of images
     p = plot(drop_position(:,1)-xmin  ,drop_position(:,2)-ymin , 'r', 'LineWidth', 1.0);
     % modified jet-colormap
     cd = [uint8(jet(n)*255) uint8(ones(n,1))].';
     drawnow;
     set(p.Edge, 'ColorBinding','interpolated', 'ColorData',cd)
-%     legend('Initial position', 'Trajectory');
 end
 
 if (show_final_ROI)
@@ -363,14 +362,6 @@ if (show_verify_position)
         pause(2);
     end
     
-%     fig4 = figure(4); hold on;
-%     set(fig4, 'position',[400 50 500 500]);
-%     axis on;
-%     index_test = 2;
-%     I3 = imread([text, sprintf('%06d', image_ind(index_test)), image_format]);
-%     imshow(I3); hold on;
-%     title(['Found position for the ', num2str(image_ind(index_test)), '-th image']);
-%     scatter(drop_position(index_test,1),drop_position(index_test,2), 'b');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

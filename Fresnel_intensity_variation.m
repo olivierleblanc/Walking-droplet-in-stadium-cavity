@@ -1,6 +1,11 @@
 % Intensity variation wrt Fresnel coeffs
 % Author : Olivier Leblanc
 % Date : 9-11-2019
+%
+% This script generates the figures concerning
+% the sensitivity in light intensity with respect to a deviation of the
+% light rays induced by a slightly tilted interface. In this case, the
+% "interface" is the liquid surface profile in the walking droplet system.
 
 close all;
 clc;
