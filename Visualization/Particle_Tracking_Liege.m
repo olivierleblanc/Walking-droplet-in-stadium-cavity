@@ -101,12 +101,12 @@ if (show_tracked_trajectory)
 
     if (show_each_track + show_each_ROI + show_each_mask)
         fig16 = figure(16); hold on;
-        set(fig16, 'position',[0 50 1000 600]);
+        set(fig16, 'position',[0 50 900 600]);
         ax0 = gca;
         set(ax0,'visible','off');
         % Top-left
         axes1 = axes('Parent',fig16,...
-            'Position',[0.05 0.55 0.35 0.35]);
+            'Position',[0.0 0.57 0.38 0.38]);
         hold(axes1,'on');
         set(axes1,'TickLabelInterpreter','Latex','FontSize',16); 
         box(axes1,'on');
@@ -116,7 +116,7 @@ if (show_tracked_trajectory)
         set(axes1,'TickLabelInterpreter','Latex','FontSize',16); 
         % Bottom-left
         axes2 = axes('Parent',fig16,...
-            'Position',[0.05 0.1 0.35 0.35]);
+            'Position',[0.0 0.1 0.38 0.38]);
         hold(axes2,'on');
         set(axes2,'TickLabelInterpreter','Latex','FontSize',16); 
         axis(axes2,'ij');
@@ -124,22 +124,22 @@ if (show_tracked_trajectory)
         xlim(axes2,[0 2*halfwidth]);
         ylim(axes2,[0 2*halfwidth]);
         % Right
-        axes3 = axes('Parent',fig16,'Position',[0.23 0.1 0.8 0.8]);
+        axes3 = axes('Parent',fig16,'Position',[0.26 0.1 0.85 0.85]);
         hold(axes3,'on');
         axis(axes3,'ij');
         set(axes3,'TickLabelInterpreter','Latex','FontSize',16); 
         xlim(axes3,[0 wx]);
         ylim(axes3,[0 hy]);
         % Legend 
-        p1=plot(xm,ym,'^m','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',0.6);
-        p2=plot(indx(1)+xb,indy(1)+yb,'^','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',0.6);
-        p3=plot([indx(1),indx(1)], [indy(1),indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);   
-        p4=plot([ROIx(1), ROIx(1)], [ROIy(1), ROIy(end)],'Parent',axes3,'color','b', 'LineWidth', 2.0);  
-        p5=plot([ROIx(1)-width, ROIx(1)-width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);   
+        p1=plot(10,10,'^m','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor',[0, 0.9, 0],'MarkerEdgeColor','k','LineWidth',0.6);
+        p2=plot(10,10,'^','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',0.6);
+        p3=plot(10,10,'Parent',axes3,'color',[0, 0.9, 0], 'LineWidth', 2.0);   
+        p4=plot(10,10,'Parent',axes3,'color','b', 'LineWidth', 2.0);  
+        p5=plot(10,10,'Parent',axes1,'color',[1, 0.8276, 0], 'LineWidth', 2.0);   
         [h,icons]=legend(axes3, [p1,p2,p4,p5,p3], {'$\mathbf{x}_{m}$','$\mathbf{x}_{pos}$','$\mathcal{R}_{1}$','$\mathcal{R}_{1,ext}$','$\mathcal{R}_{2}$'}, 'Interpreter','Latex','FontSize', 18.0);
         icons = findobj(icons,'Type','line');
         set(icons,'MarkerSize',12);
-        set(h,'Position',[0.74 0.665 0.116 0.217],...
+        set(h,'Position',[0.82 0.7 0.12 0.23],...
             'Interpreter','latex','AutoUpdate','off');
     end
     % legend('Brightest pixel in the image difference','Gravity center of the mask','Most correlated point','Darkest point inside the ROI');
@@ -223,23 +223,23 @@ if (show_tracked_trajectory)
 
         if (show_each_mask)
             imshow(mask, 'Parent', axes1);
-            plot(xm,ym, '^b','Parent',axes1, 'MarkerSize',8,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',1);
+            plot(xm,ym, '^b','Parent',axes1, 'MarkerSize',8,'MarkerFaceColor',[0, 0.9, 0],'MarkerEdgeColor','k','LineWidth',1);
             axis(axes1, 'on'); 
-            plot([ROIx(1)-width, ROIx(1)-width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);   % Left-side
-            plot([ROIx(end)+width, ROIx(end)+width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);  % right-side
-            plot([ROIx(1)-width, ROIx(end)+width], [ROIy(1)-width, ROIy(1)-width],'Parent',axes1,'color','g', 'LineWidth', 2.0);  % upper-side
-            plot([ROIx(1)-width, ROIx(end)+width], [ROIy(end)+width, ROIy(end)+width],'Parent',axes1,'color','g', 'LineWidth', 2.0);  % lower-side
+            plot([ROIx(1)-width, ROIx(1)-width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color',[1, 0.8276, 0], 'LineWidth', 2.0);   % Left-side
+            plot([ROIx(end)+width, ROIx(end)+width], [ROIy(1)-width, ROIy(end)+width],'Parent',axes1,'color',[1, 0.8276, 0], 'LineWidth', 2.0);  % right-side
+            plot([ROIx(1)-width, ROIx(end)+width], [ROIy(1)-width, ROIy(1)-width],'Parent',axes1,'color',[1, 0.8276, 0], 'LineWidth', 2.0);  % upper-side
+            plot([ROIx(1)-width, ROIx(end)+width], [ROIy(end)+width, ROIy(end)+width],'Parent',axes1,'color',[1, 0.8276, 0], 'LineWidth', 2.0);  % lower-side
         end
 
         if (show_each_track)
             imshow(I2, 'Parent', axes3);
-            p1=plot(xm,ym,'^m','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',0.6);
+            p1=plot(xm,ym,'^m','Parent',axes3, 'MarkerSize',8,'MarkerFaceColor',[0, 0.9, 0],'MarkerEdgeColor','k','LineWidth',0.6);
 %             scatter(x+ROIx(1),y+ROIy(1),'Parent',axes3,'b');
-            plot(indx(1)+xb,indy(1)+yb,'^','Parent',axes3, 'MarkerSize',5,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',0.6);
-            plot([indx(1),indx(1)], [indy(1),indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);   % Left-side
-            plot([indx(end), indx(end)], [indy(1), indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);  % right-side
-            plot([indx(1), indx(end)], [indy(1), indy(1)],'Parent',axes3,'color','m', 'LineWidth', 2.0);  % upper-side
-            plot([indx(1), indx(end)], [indy(end), indy(end)],'Parent',axes3,'color','m', 'LineWidth', 2.0);  % lower-side
+            plot(indx(1)+xb,indy(1)+yb,'^','Parent',axes3, 'MarkerSize',8,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',0.6);
+            plot([indx(1),indx(1)], [indy(1),indy(end)],'Parent',axes3,'color',[0, 0.9, 0], 'LineWidth', 2.0);   % Left-side
+            plot([indx(end), indx(end)], [indy(1), indy(end)],'Parent',axes3,'color',[0, 0.9, 0], 'LineWidth', 2.0);  % right-side
+            plot([indx(1), indx(end)], [indy(1), indy(1)],'Parent',axes3,'color',[0, 0.9, 0], 'LineWidth', 2.0);  % upper-side
+            plot([indx(1), indx(end)], [indy(end), indy(end)],'Parent',axes3,'color',[0, 0.9, 0], 'LineWidth', 2.0);  % lower-side
             plot([ROIx(1), ROIx(1)], [ROIy(1), ROIy(end)],'Parent',axes3,'color','b', 'LineWidth', 2.0);   % Left-side
             plot([ROIx(end), ROIx(end)], [ROIy(1), ROIy(end)],'Parent',axes3,'color','b', 'LineWidth', 2.0);  % right-side
             plot([ROIx(1), ROIx(end)], [ROIy(1), ROIy(1)],'Parent',axes3,'color','b', 'LineWidth', 2.0);  % upper-side
@@ -250,20 +250,20 @@ if (show_tracked_trajectory)
 
         if (show_each_ROI)
               imshow(I2(indy, indx), 'Parent', axes2);
-              plot([1 1], [1 width],'Parent',axes2,'color','m', 'LineWidth', 2.0);   % Left-side
-              plot([width width], [1, width],'Parent',axes2,'color','m', 'LineWidth', 2.0);  % right-side
-              plot([1 width], [1 1],'Parent',axes2,'color','m', 'LineWidth', 2.0);  % upper-side
-              plot([1 width], [width width],'Parent',axes2,'color','m', 'LineWidth', 2.0);  % lower-side
+              plot([1 1], [1 width],'Parent',axes2,'color',[0, 0.9, 0], 'LineWidth', 2.0);   % Left-side
+              plot([width width], [1, width],'Parent',axes2,'color',[0, 0.9, 0], 'LineWidth', 2.0);  % right-side
+              plot([1 width], [1 1],'Parent',axes2,'color',[0, 0.9, 0], 'LineWidth', 2.0);  % upper-side
+              plot([1 width], [width width],'Parent',axes2,'color',[0, 0.9, 0], 'LineWidth', 2.0);  % lower-side
             if (im_find_circles)
                 if (length(radii)>=2)
-                    viscircles(centers(1,:), radii(1),'EdgeColor','g');
-                    viscircles(centers(2,:), radii(2),'EdgeColor','m');
+                    viscircles(centers(1,:), radii(1),'EdgeColor','T');
+                    viscircles(centers(2,:), radii(2),'EdgeColor',[0, 0.9, 0]);
                 end
             end
-            plot(xm-indx(1),ym-indy(1), '^b','Parent',axes2, 'MarkerSize',10,'MarkerFaceColor','m','MarkerEdgeColor','k','LineWidth',1.2);
+            plot(xm-indx(1),ym-indy(1), '^b','Parent',axes2, 'MarkerSize',10,'MarkerFaceColor',[0, 0.9, 0],'MarkerEdgeColor','k','LineWidth',1.2);
             plot(xb,yb,'^r','Parent',axes2, 'MarkerSize',10,'MarkerFaceColor','r','MarkerEdgeColor','k','LineWidth',1.2);
 %             plot(x-indx(1)+ROIx(1),y-indy(1)+ROIy(1),'^m','Parent',axes2, 'MarkerSize',10,'MarkerFaceColor','m','MarkerEdgeColor','k');
-%             scatter(xcorr, ycorr,'g');
+%             scatter(xcorr, ycorr,[0, 0.9, 0]);
             axis(axes2, 'on');
         end
 
